@@ -32,6 +32,7 @@
 
             </li>
 
+
             <li class="dropdown notification-list">
                 <a href="javascript:void(0);" class="nav-link right-bar-toggle waves-effect">
                     <i class="mdi mdi-settings-outline noti-icon"></i>
@@ -91,29 +92,28 @@
                 <h4 style="font-size: 20px; font-family: American Typewriter; text-align: center"
                     class="header-title mb-4">
                     LIST PRODUCT</h4>
+                <h4>
+                    <a href="/products?action=create"> Add Product</a>
+                </h4>
                 <div class="table-responsive">
                     <table class="table table-centered" id="btn-editable">
-                        <thead>
                         <tr>
                             <th>#</th>
-                            <th>Name Product</th>
+                            <th>Name</th>
                             <th>Price</th>
                             <th>Quantity</th>
                             <th>Color</th>
+                            <th>Discription</th>
                             <th>Category</th>
-                            <th colspan="2F">Action</th>
+                            <th colspan="2">Action</th>
                         </tr>
-                        </thead>
-                        <tbody>
                         <tr id="2">
-                            <c:forEach var="product" items="${requestScope.listProduct}">
+                            <c:forEach var="product" items="${listProduct}">
+
                             <td><c:out value="${product.getId()}"></c:out></td>
 
                             <td><c:out value="${product.getName()}"></c:out></td>
 
-                            <td>
-                                <img style="width: 70px; height: 70px; border-radius: 10%" src="${product.getImage()}">
-                            </td>
 
                             <td>
                                 <fmt:formatNumber type="number"
@@ -121,30 +121,41 @@
 
                                 </fmt:formatNumber>
                             </td>
+                            <td><c:out value="${product.getQuantity()}"></c:out></td>
 
-                            <td name="catagory">
-                                <c:forEach items="${applicationScope.listCatagory}" var="catagory">
-                                    <c:if test="${catagory.getId() == product.getCatagory()}">
-                                        <c:out value="${catagory.getName()}"></c:out>
+                            <td><c:out value="${product.getColor()}"></c:out></td>
+
+
+                            <td><c:out value="${product.getDescription()}"></c:out></td>
+
+                            <td name="category">
+                                <c:forEach items="${applicationScope.listCategory}" var="category">
+                                    <c:if test="${category.getId() == product.getCategory()}">
+                                        <c:out value="${category.getName()}"></c:out>
                                     </c:if>
                                 </c:forEach>
                             </td>
 
                             <td>
-                                <button onclick="window.location.href ='${pageContext.request.contextPath}/products?action=edit&id=${product.getId()}'">
-                                    Edit
-                                </button>
+                                <a href="/products?action=edit&id=${product.id}">
+                                    <button type="button" class="btn btn-warning waves-effect width-md waves-light"
+                                            style="width: 5px">
+                                        Edit
+                                    </button>
+                                </a>
                             </td>
                             <td>
-                                <button onclick="window.location.href ='${pageContext.request.contextPath}/products?action=delete&id=${product.getId()}'">
-                                    Delete
-                                </button>
+                                <a href="/products?action=delete&id=${product.id}">
+                                    <button type="button" class="btn btn-danger waves-effect width-md waves-light"
+                                            style="width: 5px">
+                                        Delete
+                                    </button>
+
+                                </a>
                             </td>
 
                         </tr>
                         </c:forEach>
-
-                        </tbody>
 
                     </table>
                 </div>

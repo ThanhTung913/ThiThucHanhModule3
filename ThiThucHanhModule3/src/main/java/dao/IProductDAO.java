@@ -6,15 +6,26 @@ import java.sql.SQLException;
 import java.util.List;
 
 public interface IProductDAO {
-    List<Product> findAll();
 
-    boolean save(Product product) throws SQLException;
+    void inserProduct(Product product) throws SQLException, ClassNotFoundException;
 
-    boolean update(Product product) throws SQLException;
+    Product selectProductById(int id) throws SQLException, ClassNotFoundException;
 
-    boolean remove(int id) throws SQLException;
+    List<Product> selectAllProduct() throws SQLException, ClassNotFoundException;
 
-    Product findById(int id);
+    boolean deleteProduct(int id) throws SQLException, ClassNotFoundException;
 
-    List<Product> searchByName(String keySearch);
+    boolean updateProduct(Product product) throws SQLException, ClassNotFoundException;
+
+    int getNoOfRecords();
+
+    List<Product> searchByName(String name) throws SQLException, ClassNotFoundException;
+
+
+    List<Product> getNumberPage(int offset, int noOfRecords, String product) throws ClassNotFoundException, SQLException;
+
+    boolean checkDuplicateNameProduct(String name) throws SQLException, ClassNotFoundException;
+
+
+    boolean checkDuplicateById(int id) throws SQLException, ClassNotFoundException;
 }

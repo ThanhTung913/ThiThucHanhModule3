@@ -70,10 +70,18 @@
         <%--        End Lọm 2--%>
 
         <!-- LỌM -->
+
         <div class="card-body">
-            <h4 style="text-align: center; font-size: 20px; font-family: 'American Typewriter' "
-                class="header-title mb-4">EDIT PRODUCT
-            </h4>
+
+
+            <div>
+                <h4 style="text-align: center; font-size: 20px; font-family: 'American Typewriter' "
+                    class="header-title mb-4">EDIT PRODUCT
+                </h4>
+                <h4 style="text-align: center">
+                    <a href="/products?action=list">ListProduct</a>
+                </h4>
+            </div>
             <c:choose>
                 <c:when test="${errors1 == null }">
                     <form method="post" enctype="multipart/form-data">
@@ -93,34 +101,34 @@
 
                         <div class="form-row">
                             <div class="form-group col-md-6">
-                                <label class="col-form-label" style="color: black ">Description</label>
-                                <input type="text" class="form-control" placeholder="Name product" name="name"
-                                       style="color: black " value="<c:out value='${product.getDescription()}' />">
+                                <label class="col-form-label" style="color: black ">Quantity</label>
+                                <input type="text" class="form-control" name="quantity"
+                                       style="color: black " value="<c:out value='${product.getQuantity()}' />">
                             </div>
                             <div class="form-group col-md-6">
-                                <label class="col-form-label" style="color: black ">Price</label>
-                                <input type="text" class="form-control" name="price" style="color: black "
-                                       value="<c:out value='${product.getPrice()}' />">
+                                <label class="col-form-label" style="color: black ">Color</label>
+                                <input type="text" class="form-control" name="color" style="color: black "
+                                       value="<c:out value='${product.getColor()}' />">
                             </div>
                         </div>
                         <div class="form-row">
                             <div class="form-group col-md-6">
                                 <label class="col-form-label" style="color: black ">Description</label>
-                                <input type="text" class="form-control" placeholder="Name product" name="name"
+                                <input type="text" class="form-control" placeholder="Name product" name="description"
                                        style="color: black " value="<c:out value='${product.getDescription()}' />">
                             </div>
-                            <div class="form-group col-md-6">
-                                <label class="col-form-label" style="color: black ">CATAGORY</label>
-                                <select class="form-control" name="catagory" style="color: black ">
-                                    <<c:forEach items="${applicationScope.listCatagory }" var="catagory">
 
+                            <div class="form-group col-md-6">
+                                <label class="col-form-label" style="color: black ">CATEGORY</label>
+                                <select class="form-control" name="category" style="color: black ">
+                                    <<c:forEach items="${applicationScope.listCategory }" var="category">
                                     <c:choose>
-                                        <c:when test="${catagory.getId() == product.getCatagory() }">
-                                            <option value="${catagory.getId() }"
-                                                    selected>${catagory.getName() }</option>
+                                        <c:when test="${category.getId() == producy.getCategory() }">
+                                            <option value="${category.getId() }"
+                                                    selected>${category.getName() }</option>
                                         </c:when>
                                         <c:otherwise>
-                                            <option value="${catagory.getId() }">${catagory.getName() }</option>
+                                            <option value="${category.getId() }">${category.getName() }</option>
                                         </c:otherwise>
                                     </c:choose>
 

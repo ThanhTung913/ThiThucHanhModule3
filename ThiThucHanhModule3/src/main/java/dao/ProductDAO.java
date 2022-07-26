@@ -7,107 +7,48 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ProductDAO implements IProductDAO {
-    private String jdbcURL = "jdbc:mysql://localhost:3306/manager_products?useSSL=false";
+    private String jdbcURL = "jdbc:mysql://localhost:3306/module3?useSSL=false";
     private String jdbcUsername = "root";
-    private String jdbcPassword = "123456";
+    private String jdbcPassword = "Thanhtung913";
+    private final String INSERT_PRODUCT_SQL = "INSERT INTO `Products` (`name`, `price`, `quantity`, `color`, `description`,`category`) VALUES (?,?, ?, ?, ?,?);";
+    private final String SELECT_PRODUCT_BY_ID = "SELECT id, name, price, quantity, color, description, category FROM Products WHERE id = ?;";
+    private final String SELECT_ALL_PRODUCT = "SELECT * FROM Products ;";
+    private final String DELETE_PRODUCT_SQL = "DELETE FROM Products WHERE id =?;";
+    private final String UPDATE_PRODUCT_SQL = "UPDATE Products SET name = ?, price=? ,quantity =?  ,color=? ,description= ?,category=? WHERE id =?;";
 
+    private int noOfRecords;
 
-    protected Connection getConnection() {
+    public ProductDAO() {
+    }
+
+    protected Connection getConnection() throws SQLException, ClassNotFoundException {
         Connection connection = null;
-        try {
-            Class.forName("com.mysql.cj.jdbc.Driver");
-            connection = DriverManager.getConnection(jdbcURL, jdbcUsername, jdbcPassword);
-        } catch (SQLException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (ClassNotFoundException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
+        Class.forName("com.mysql.jdbc.Driver");
+        connection = DriverManager.getConnection(jdbcURL, jdbcUsername, jdbcPassword);
         return connection;
     }
 
-    private void printSQLException(SQLException ex) {
-        for (Throwable e : ex) {
-            if (e instanceof SQLException) {
-                e.printStackTrace(System.err);
-                System.err.println("SQLState: " + ((SQLException) e).getSQLState());
-                System.err.println("Error Code: " + ((SQLException) e).getErrorCode());
-                System.err.println("Message: " + e.getMessage());
-                Throwable t = ex.getCause();
-                while (t != null) {
-                    System.out.println("Cause: " + t);
-                    t = t.getCause();
-                }
-            }
-        }
+    @Override
+    public void inserProduct(Product product) throws SQLException, ClassNotFoundException {
+        System.out.println(INSERT_PRODUCT_SQL);
+        Connection connection = getConnection();
+        PreparedStatement preparedStatement = connection.prepareStatement(INSERT_PRODUCT_SQL);
+        preparedStatement.setString(1, product.getName());
+        preparedStatement.setInt(2, product.getPrice());
+        preparedStatement.setInt(3, product.getQuantity());
+        preparedStatement.setString(4, product.getColor());
+        preparedStatement.setString(5, product.getDescription());
+        preparedStatement.setInt(6, product.getCategory());
+        preparedStatement.executeUpdate();
+        connection.close();
     }
 
     @Override
-    public List<Product> findAll() {
-        String SELECT_ALL_PRODUCTS = "SELECT * FROM products ;";
-        List<Product> productsList = new ArrayList<>();
+    public boolean updateProduct(Product product) throws SQLException, ClassNotFoundException {
+        boolean rowUpdate = false;
+        boolean success = false;
         try {
             Connection connection = getConnection();
-            PreparedStatement preparedStatement = connection.prepareStatement(SELECT_ALL_PRODUCTS);
-            System.out.println(preparedStatement);
-            ResultSet rs = preparedStatement.executeQuery();
-            while (rs.next()) {
-                int id = rs.getInt("id");
-                String name_products = rs.getString("name_product");
-                int price = rs.getInt("price");
-                Integer quantity = rs.getInt("quantity");
-                String color = rs.getString("color");
-                String description = rs.getString("description_product");
-                int category = rs.getInt("category");
-                productsList.add(new Product(id, name_products, price, quantity, color, description, category));
-            }
-        } catch (SQLException e) {
-            printSQLException(e);
-        }
-        return productsList;
-    }
-
-    @Override
-    public boolean save(Product product) throws SQLException {
-        String INSERT_PRODUCT = "INSERT INTO products(name_product,price,quantity,color,description_product,category)" +
-                "VALUES(?,?,?,?,?,?)";
-        boolean isInsert = false;
-        Connection connection = null;
-        try {
-            connection = getConnection();
-            connection.setAutoCommit(false);
-            PreparedStatement preparedStatement = connection.prepareStatement(INSERT_PRODUCT);
-            preparedStatement.setString(1, product.getName());
-            preparedStatement.setDouble(2, product.getPrice());
-            preparedStatement.setInt(3, product.getQuantity());
-            preparedStatement.setString(4, product.getColor());
-            preparedStatement.setString(5, product.getDescription());
-            preparedStatement.setInt(6, product.getCategory());
-
-            System.out.println(preparedStatement);
-            preparedStatement.executeUpdate();
-            isInsert = true;
-            connection.commit();
-        } catch (SQLException e) {
-            printSQLException(e);
-            connection.rollback();
-            isInsert = false;
-        } finally {
-            connection.setAutoCommit(true);
-            connection.close();
-        }
-        return isInsert;
-    }
-
-    @Override
-    public boolean update(Product product) throws SQLException {
-        String UPDATE_PRODUCT_SQL = "UPDATE products SET name_product = ? ,price = ?, quantity =?, color = ?, description_product =?, category = ? WHERE id = ?";
-        boolean rowUpdated = false;
-        Connection connection = null;
-        try {
-            connection = getConnection();
-            connection.setAutoCommit(false);
             PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_PRODUCT_SQL);
             preparedStatement.setString(1, product.getName());
             preparedStatement.setInt(2, product.getPrice());
@@ -116,35 +57,31 @@ public class ProductDAO implements IProductDAO {
             preparedStatement.setString(5, product.getDescription());
             preparedStatement.setInt(6, product.getCategory());
             preparedStatement.setInt(7, product.getId());
-            rowUpdated = preparedStatement.executeUpdate() > 0;
-        } catch (SQLException e) {
-            e.printStackTrace();
-            rowUpdated = false;
-        } finally {
+            rowUpdate = preparedStatement.executeUpdate() > 0;
             connection.close();
+            success = true;
+        } catch (SQLException e) {
+            printSQLException(e);
         }
-        return rowUpdated;
+        return success;
     }
 
-
     @Override
-    public Product findById(int id) {
-        String SELECT_PRODUCT_BY_ID = "SELECT * FROM products WHERE id = ?";
+    public Product selectProductById(int id) throws SQLException, ClassNotFoundException {
         Product product = null;
         try {
             Connection connection = getConnection();
             PreparedStatement preparedStatement = connection.prepareStatement(SELECT_PRODUCT_BY_ID);
             preparedStatement.setInt(1, id);
-            System.out.println(preparedStatement);
-            ResultSet rs = preparedStatement.executeQuery();
-            while (rs.next()) {
-                String name_products = rs.getString("name_product");
-                int price = rs.getInt("price");
-                Integer quantity = rs.getInt("quantity");
-                String color = rs.getString("color");
-                String description = rs.getString("description_product");
-                int category = rs.getInt("category");
-                product = new Product(id, name_products, price, quantity, color, description, category);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()) {
+                String name = resultSet.getString("name");
+                int price = Integer.parseInt(resultSet.getString("price"));
+                int quantity = Integer.parseInt(resultSet.getString("quantity"));
+                String color = resultSet.getString("color");
+                String description = resultSet.getString("description");
+                int category = Integer.parseInt(resultSet.getString("category"));
+                product = new Product(id, name, price, quantity, color, description, category);
             }
         } catch (SQLException e) {
             printSQLException(e);
@@ -153,54 +90,128 @@ public class ProductDAO implements IProductDAO {
     }
 
     @Override
-    public List<Product> searchByName(String keySearch) {
-        String SEARCH_BY_NAME = "SELECT * FROM products WHERE name_product LIKE ?";
-        List<Product> productsList = new ArrayList<>();
+    public List<Product> selectAllProduct() throws SQLException, ClassNotFoundException {
+        List<Product> listProduct = new ArrayList<>();
         try {
             Connection connection = getConnection();
-            PreparedStatement preparedStatement = connection.prepareStatement(SEARCH_BY_NAME);
-            keySearch = "%" + keySearch + "%";
-            preparedStatement.setString(1, keySearch);
-            System.out.println(preparedStatement);
-            ResultSet rs = preparedStatement.executeQuery();
-            while (rs.next()) {
-                int id = rs.getInt("id");
-                String name_products = rs.getString("name_product");
-                int price = rs.getInt("price");
-                Integer quantity = rs.getInt("quantity");
-                String color = rs.getString("color");
-                String description = rs.getString("description_product");
-                int category = rs.getInt("category");
-                productsList.add(new Product(id, name_products, price, quantity, color, description, category));
+            PreparedStatement preparedStatement = connection.prepareStatement(SELECT_ALL_PRODUCT);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()) {
+                int id = resultSet.getInt("id");
+                String name = resultSet.getString("name");
+                int price = resultSet.getInt("price");
+                int quantity = resultSet.getInt("quantity");
+                String color = resultSet.getString("color");
+                String description = resultSet.getString("description");
+                int category = resultSet.getInt("category");
+                listProduct.add(new Product(id, name, price, quantity, color, description, category));
             }
         } catch (SQLException e) {
             printSQLException(e);
         }
-        return productsList;
+        return listProduct;
     }
 
-    public boolean remove(int id) throws SQLException {
-        String DELETE = "DELETE FROM products  WHERE id = ?";
-
-        Connection connection = null;
-        boolean isRemoveData = false;
+    @Override
+    public boolean deleteProduct(int id) throws SQLException, ClassNotFoundException {
+        boolean rowDelete = false;
         try {
-            connection = getConnection();
-            connection.setAutoCommit(false);
-
-            PreparedStatement preparedStatement = connection.prepareStatement(DELETE);
+            Connection connection = getConnection();
+            PreparedStatement preparedStatement = connection.prepareStatement(DELETE_PRODUCT_SQL);
             preparedStatement.setInt(1, id);
-            System.out.println(preparedStatement);
-            isRemoveData = preparedStatement.executeUpdate() > 0;
-
-            connection.commit();
+            rowDelete = preparedStatement.executeUpdate() > 0;
         } catch (SQLException e) {
-            e.printStackTrace();
-            connection.rollback();
-        } finally {
-            connection.setAutoCommit(true);
-            connection.close();
+            printSQLException(e);
         }
-        return isRemoveData;
+
+        return rowDelete;
+    }
+
+
+    @Override
+    public int getNoOfRecords() {
+        return noOfRecords;
+    }
+
+    @Override
+    public List<Product> searchByName(String name) throws SQLException, ClassNotFoundException {
+        List<Product> listProduct = selectAllProduct();
+        List<Product> listSearch = new ArrayList<>();
+
+        for (Product product : listProduct) {
+            if (product.getName().toLowerCase().contains(name.toLowerCase())) {
+                listSearch.add(product);
+            }
+        }
+        return listSearch;
+    }
+
+    @Override
+    public List<Product> getNumberPage(int offset, int noOfRecords, String searchproduct) throws ClassNotFoundException, SQLException {
+        Connection connection = getConnection();
+        System.out.println("numberpage");
+
+        String query = "SELECT SQL_CALC_FOUND_ROWS * FROM Products where name LIKE ? limit " + offset + ", " + noOfRecords;
+        List<Product> listSearchProduct = new ArrayList<>();
+        PreparedStatement ps = connection.prepareStatement(query);
+        ps.setString(1, '%' + searchproduct + '%');
+        System.out.println(this.getClass() + " getNumberPage() query: " + ps);
+        ResultSet rs = ps.executeQuery();
+        while (rs.next()) {
+            Product product = new Product();
+            product.setId(rs.getInt("id"));
+            product.setName(rs.getString("name"));
+            product.setPrice(rs.getInt("price"));
+            product.setQuantity(rs.getInt("quantity"));
+            product.setColor(rs.getString("color"));
+            product.setDescription(rs.getString("description"));
+            product.setCategory(rs.getInt("category"));
+            listSearchProduct.add(product);
+
+        }
+        rs = ps.executeQuery("SELECT FOUND_ROWS()");
+        if (rs.next()) {
+            this.noOfRecords = rs.getInt(1);
+        }
+        connection.close();
+        return listSearchProduct;
+    }
+
+    @Override
+    public boolean checkDuplicateNameProduct(String name) throws SQLException, ClassNotFoundException {
+        List<Product> listProduct = selectAllProduct();
+        for (Product product : listProduct) {
+            if (product.getName().equals(name.toLowerCase())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public boolean checkDuplicateById(int id) throws SQLException, ClassNotFoundException {
+        List<Product> listProduct = selectAllProduct();
+        for (Product product : listProduct) {
+            if (product.getId() == id) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private void printSQLException(SQLException exception) {
+        for (Throwable e : exception) {
+            if (e instanceof SQLException) {
+                e.printStackTrace(System.err);
+                System.err.println("SQLState: " + ((SQLException) e).getSQLState());
+                System.err.println("Error code: " + ((SQLException) e).getErrorCode());
+                System.err.println("Message: " + e.getMessage());
+                Throwable t = exception.getCause();
+                while (t != null) {
+                    System.out.println("Cause: " + t);
+                    t = t.getCause();
+                }
+            }
+        }
     }
 }
